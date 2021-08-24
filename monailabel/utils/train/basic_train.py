@@ -7,7 +7,7 @@ from abc import abstractmethod
 from datetime import datetime
 
 import torch
-from monai.data import DataLoader, PersistentDataset
+from monai.data import DataLoader, PersistentDataset, CacheDataset
 from monai.engines.workflow import Engine, Events
 from monai.handlers import (
     CheckpointLoader,
@@ -143,7 +143,8 @@ class BasicTrainTask(TrainTask):
             raise ValueError("Training pre-transforms are not of `list` or `Compose` type")
 
         return DataLoader(
-            dataset=PersistentDataset(self._train_datalist, train_pre_transforms, cache_dir=None),
+            #dataset=PersistentDataset(self._train_datalist, train_pre_transforms, cache_dir=None),
+            dataset=CacheDataset(self._train_datalist, train_pre_transforms, cache_rate=1.0),
             batch_size=self._train_batch_size,
             shuffle=True,
             num_workers=self._train_num_workers,
@@ -201,7 +202,8 @@ class BasicTrainTask(TrainTask):
     def val_data_loader(self):
         return (
             DataLoader(
-                dataset=PersistentDataset(self._val_datalist, self.val_pre_transforms(), cache_dir=None),
+                #dataset=PersistentDataset(self._val_datalist, self.val_pre_transforms(), cache_dir=None),
+                dataset=CacheDataset(self._val_datalist, self.val_pre_transforms(), cache_rate=1.0),
                 batch_size=self._val_batch_size,
                 shuffle=False,
                 num_workers=self._val_num_workers,
